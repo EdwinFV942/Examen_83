@@ -21,7 +21,15 @@ deploy_dev:
   stage: dev
   script:
     - echo "Validando y desplegando en ambiente DEV..."
-    # Aquí puedes añadir pruebas unitarias con pytest
+    # Configuración de SSH para conectar a la EC2 de Dev
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client git -y )'
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - ssh-keyscan $EC2_DEV_IP >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    # Comandos para actualizar la app en EC2
+    - ssh ubuntu@$EC2_DEV_IP "cd /ruta/a/tu/proyecto && git checkout develop && git pull origin develop && source venv/bin/activate && pip install -r requirements.txt && alembic upgrade head && sudo systemctl restart fastapi"
   only:
     - develop
 
@@ -29,6 +37,13 @@ deploy_prod:
   stage: prod
   script:
     - echo "Desplegando en ambiente PROD..."
-    # Scripts de producción
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client git -y )'
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - ssh-keyscan $EC2_PROD_IP >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    # Comandos para actualizar la app en EC2
+    - ssh ubuntu@$EC2_PROD_IP "cd /ruta/a/tu/proyecto && git checkout main && git pull origin main && source venv/bin/activate && pip install -r requirements.txt && alembic upgrade head && sudo systemctl restart fastapi"
   only:
     - main
