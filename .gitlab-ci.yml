@@ -1,0 +1,34 @@
+stages:
+  - dev
+  - prod
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+cache:
+  paths:
+    - .cache/pip
+    - venv/
+
+before_script:
+  - python -V
+  - pip install virtualenv
+  - virtualenv venv
+  - source venv/bin/activate
+  - pip install -r requirements.txt
+
+deploy_dev:
+  stage: dev
+  script:
+    - echo "Validando y desplegando en ambiente DEV..."
+    # Aquí puedes añadir pruebas unitarias con pytest
+  only:
+    - develop
+
+deploy_prod:
+  stage: prod
+  script:
+    - echo "Desplegando en ambiente PROD..."
+    # Scripts de producción
+  only:
+    - main
