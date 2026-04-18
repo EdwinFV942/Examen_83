@@ -14,3 +14,6 @@ def eliminar(id):
 
 def filtrar(inicio, fin):
     return alumno_repository.filtrar_por_fecha(inicio, fin)
+
+def obtener_por_id(id):
+    return alumno_repository.obtener_por_id(id)
